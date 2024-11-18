@@ -1,0 +1,88 @@
+# Palindrome recognizer Turing Machine
+states:
+  - q0  # Initial state, moves right to end of string
+  - q1  # Moving left to compare
+  - q2  # Moving right to next comparison
+  - qaccept  # Accept state
+  - qreject  # Reject state
+
+input_alphabet:
+  - "a"
+  - "b"
+
+tape_alphabet:
+  - "a"
+  - "b"
+  - "X"  # Marked symbol
+  - "B"  # Blank symbol
+
+blank_symbol: "B"
+initial_state: "q0"
+final_states:
+  - "qaccept"
+
+transitions:
+  # Moving right until blank
+  - current: "q0"
+    read: "a"
+    write: "a"
+    next: "q0"
+    direction: "R"
+  - current: "q0"
+    read: "b"
+    write: "b"
+    next: "q0"
+    direction: "R"
+  - current: "q0"
+    read: "B"
+    write: "B"
+    next: "q1"
+    direction: "L"
+
+  # Moving left, comparing and marking
+  - current: "q1"
+    read: "a"
+    write: "X"
+    next: "q2"
+    direction: "L"
+  - current: "q1"
+    read: "b"
+    write: "X"
+    next: "q2"
+    direction: "L"
+  - current: "q1"
+    read: "X"
+    write: "X"
+    next: "q1"
+    direction: "L"
+
+  # Moving right to compare
+  - current: "q2"
+    read: "a"
+    write: "a"
+    next: "q2"
+    direction: "R"
+  - current: "q2"
+    read: "b"
+    write: "b"
+    next: "q2"
+    direction: "R"
+  - current: "q2"
+    read: "X"
+    write: "X"
+    next: "q1"
+    direction: "L"
+
+  # Accept conditions
+  - current: "q1"
+    read: "B"
+    write: "B"
+    next: "qaccept"
+    direction: "R"
+
+test_strings:
+  - "abba"
+  - "abcba"
+  - "abbba"
+  - "ababb"  # This one should be rejected
+  - "aabbaa"

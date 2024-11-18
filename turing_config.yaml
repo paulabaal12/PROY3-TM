@@ -72,17 +72,30 @@ transitions:
     write: "X"
     next: "q1"
     direction: "L"
+  - current: "q2"
+    read: "B"
+    write: "B"
+    next: "qreject"
+    direction: "S"
 
   # Accept conditions
   - current: "q1"
     read: "B"
     write: "B"
     next: "qaccept"
-    direction: "R"
+    direction: "S"
+
+  # Transitions for single character or empty tape
+  - current: "q2"
+    read: "X"
+    write: "X"
+    next: "qaccept"
+    direction: "S"
 
 test_strings:
-  - "abba"
-  - "abcba"
-  - "abbba"
-  - "ababb"  # This one should be rejected
-  - "aabbaa"
+  - "abba"    # Should be accepted
+  - "aba"     # Should be accepted
+  - "a"      # Should be accepted
+  - "abbba"   # Should be accepted
+  - "ababb"   # Should be rejected
+  - "aabbaa"  # Should be accepted

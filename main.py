@@ -63,13 +63,10 @@ class TuringMachine:
             x_markers = ', '.join(['X'] * head_pos)
             steps.append(f"         →  {x_markers} [{Fore.BLUE}{current_state}{Style.RESET_ALL}, {Fore.MAGENTA}{tape[head_pos]}{Style.RESET_ALL}] {', '.join(tape[head_pos:])}")
             
-            if current_state in self.config.final_states:
-                break
-
             transition_key = (current_state, tape[head_pos])
             if transition_key not in self.config.transitions:
-                print(f"{Fore.RED}No valid transition for {transition_key}{Style.RESET_ALL}")
-                return False, steps
+                steps.append(f"{Fore.RED}No valid transition for {transition_key}{Style.RESET_ALL}")
+                break
 
             transition = self.config.transitions[transition_key]
             tape[head_pos] = transition['write_symbol']
@@ -81,9 +78,6 @@ class TuringMachine:
                     tape.append('_')
             elif transition['direction'] == 'L':
                 head_pos = max(head_pos - 1, 0)
-            
-            if head_pos >= len(tape):
-                break
 
         # Print all steps
         for step in steps:
@@ -91,7 +85,8 @@ class TuringMachine:
 
         result = current_state in self.config.final_states
         result_color = Fore.GREEN if result else Fore.RED
-        print(f"\nThe String: {input_string} is {result_color}{'ACCEPTED' if result else 'REJECTED'}{Style.RESET_ALL} by the TM")
+        result_message = 'ACCEPTED' if result else 'REJECTED'
+        print(f"\nThe String: {input_string} is {result_color}{result_message}{Style.RESET_ALL} by the TM")
         print("="*50)
 
         return result, steps

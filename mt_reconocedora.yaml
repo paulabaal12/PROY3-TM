@@ -1,121 +1,103 @@
-# MT Reconocedora: Reconoce cadenas de la forma a^n b^n donde n >= 1
-states:
-  - q0    # Estado inicial: verifica primer 'a'
-  - q1    # Marca 'a' y busca 'b' correspondiente
-  - q2    # Marca 'b' y regresa a buscar siguiente 'a'
-  - q3    # Estado de verificación final
-  - q4    # Estado de aceptación
-  - qr    # Estado de rechazo
+# MT Reconocedora: Verifica si una cadena tiene el mismo número de a's que b's
+# Lista de estados
+q_states:
+  q_list:
+    - 'q0'  # Estado inicial
+    - 'q1'  # Buscando 'b' para cancelar una 'a'
+    - 'q2'  # Regresando al inicio
+    - 'q3'  # Estado de aceptación
+    - 'q4'  # Estado de rechazo
+  initial: 'q0'
+  final: 'q3'
 
-input_alphabet:
-  - "a"
-  - "b"
-
+# Alfabetos de la MT
+alphabet:
+  - a
+  - b
 tape_alphabet:
-  - "a"
-  - "b"
-  - "X"    # Para marcar 'a's procesados
-  - "Y"    # Para marcar 'b's procesados
-  - "B"    # Símbolo blanco
+  - X  # Marca para símbolos ya procesados
+  - a
+  - b
+  - _
 
-blank_symbol: "B"
-initial_state: "q0"
-final_states: 
-  - "q4"    # Estado de aceptación
+# Función de transición
+delta:
+  # Desde q0, buscar una 'a' sin marcar
+  - params:
+      initial_state: 'q0'
+      tape_input: 'a'
+    output:
+      final_state: 'q1'
+      tape_output: 'X'
+      tape_displacement: R
 
-transitions:
-  # Estado q0: Verifica que comience con 'a'
-  - current: "q0"
-    read: "a"
-    write: "X"
-    next: "q1"
-    direction: "R"
-  
-  - current: "q0"
-    read: "b"
-    write: "b"
-    next: "qr"
-    direction: "R"
-    
-  - current: "q0"
-    read: "B"
-    write: "B"
-    next: "qr"
-    direction: "R"
+  # Desde q0, buscar una 'b' sin marcar
+  - params:
+      initial_state: 'q0'
+      tape_input: 'b'
+    output:
+      final_state: 'q4'
+      tape_output: 'b'
+      tape_displacement: S
 
-  # Estado q1: Busca 'b' correspondiente
-  - current: "q1"
-    read: "a"
-    write: "a"
-    next: "q1"
-    direction: "R"
-    
-  - current: "q1"
-    read: "b"
-    write: "Y"
-    next: "q2"
-    direction: "L"
-    
-  - current: "q1"
-    read: "Y"
-    write: "Y"
-    next: "q1"
-    direction: "R"
-    
-  - current: "q1"
-    read: "B"
-    write: "B"
-    next: "qr"
-    direction: "L"
+  # Desde q0, si llegamos al final y todo está marcado, aceptar
+  - params:
+      initial_state: 'q0'
+      tape_input: '_'
+    output:
+      final_state: 'q3'
+      tape_output: '_'
+      tape_displacement: S
 
-  # Estado q2: Regresa a buscar siguiente 'a'
-  - current: "q2"
-    read: "a"
-    write: "a"
-    next: "q2"
-    direction: "L"
-    
-  - current: "q2"
-    read: "X"
-    write: "X"
-    next: "q0"
-    direction: "R"
-    
-  - current: "q2"
-    read: "Y"
-    write: "Y"
-    next: "q2"
-    direction: "L"
+  # En q1, ignorar símbolos marcados
+  - params:
+      initial_state: 'q1'
+      tape_input: 'X'
+    output:
+      final_state: 'q1'
+      tape_output: 'X'
+      tape_displacement: R
 
-  # Estado q3: Verificación final
-  - current: "q3"
-    read: "X"
-    write: "X"
-    next: "q3"
-    direction: "R"
-    
-  - current: "q3"
-    read: "Y"
-    write: "Y"
-    next: "q3"
-    direction: "R"
-    
-  - current: "q3"
-    read: "B"
-    write: "B"
-    next: "q4"
-    direction: "S"
+  # En q1, encontrar una 'b' para cancelar la 'a'
+  - params:
+      initial_state: 'q1'
+      tape_input: 'b'
+    output:
+      final_state: 'q2'
+      tape_output: 'X'
+      tape_displacement: L
 
-  # Transiciones especiales
-  - current: "q0"
-    read: "Y"
-    write: "Y"
-    next: "q3"
-    direction: "R"
+  # En q1, si llegamos al final sin encontrar 'b', rechazar
+  - params:
+      initial_state: 'q1'
+      tape_input: '_'
+    output:
+      final_state: 'q4'
+      tape_output: '_'
+      tape_displacement: S
 
-test_strings:
-  - "aaabbb"     # Debe ser aceptada (n=3)
-  - "aaaaabbbbbb" # Debe ser rechazada (n≠m)
-  - "abababab"    # Debe ser rechazada (formato incorrecto)
-  - "aaaabbbb"    # Debe ser aceptada (n=4)
-  - "aabb"        # Debe ser aceptada (n=2)
+  # En q2, regresar al inicio
+  - params:
+      initial_state: 'q2'
+      tape_input: 'X'
+    output:
+      final_state: 'q2'
+      tape_output: 'X'
+      tape_displacement: L
+
+  # En q2, al encontrar espacio en blanco, volver a empezar
+  - params:
+      initial_state: 'q2'
+      tape_input: '_'
+    output:
+      final_state: 'q0'
+      tape_output: '_'
+      tape_displacement: R
+
+# Cadenas a ser simuladas por su MT
+simulation_strings:
+  - 'aabb'    # Debe aceptar
+  - 'abba'    # Debe aceptar
+  - 'aaabbb'  # Debe rechazar
+  - 'abab'    # Debe aceptar
+  - 'aabbb'   # Debe rechazar

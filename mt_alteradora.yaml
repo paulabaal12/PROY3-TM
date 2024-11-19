@@ -1,128 +1,243 @@
-# MT Alteradora: Duplica todas las 'a' en una cadena
-states:
-  - q0    # Estado inicial
-  - q1    # Busca la siguiente 'a'
-  - q2    # Marca posición para duplicar
-  - q3    # Busca espacio para insertar
-  - q4    # Regresa a posición original
-  - q5    # Estado de aceptación
-  - qr    # Estado de rechazo
+# Lista de estados
+q_states:
+  q_list:
+  - 'q0'
+  - 'q1'
+  - 'q2'
+  - 'q3'
+  - 'q4'
+  - 'q5'
+  - 'q6'
+  initial: 'q0'
+  final: 'q6'
 
-input_alphabet:
-  - "a"
-  - "b"
-
+# Alfabetos de la MT
+alphabet:
+- a
+- b
 tape_alphabet:
-  - "a"
-  - "b"
-  - "X"    # Marca posición actual
-  - "Y"    # Marca posición de inserción
-  - "B"    # Símbolo blanco
+- X
+- a
+- b
 
-blank_symbol: "B"
-initial_state: "q0"
-final_states: 
-  - "q5"    # Estado de aceptación
+# Función de transición
+delta:
+  - params:
+      initial_state: 'q0'
+      mem_cache_value:
+      tape_input: 'a'
+    output:
+      final_state: 'q0'
+      mem_cache_value:
+      tape_output: 'a'
+      tape_displacement: R
 
-transitions:
-  # Estado q0: Inicio
-  - current: "q0"
-    read: "a"
-    write: "X"
-    next: "q1"
-    direction: "R"
-    
-  - current: "q0"
-    read: "b"
-    write: "b"
-    next: "q1"
-    direction: "R"
-    
-  - current: "q0"
-    read: "B"
-    write: "B"
-    next: "q5"
-    direction: "S"
+  - params:
+      initial_state: 'q0'
+      mem_cache_value:
+      tape_input: 'b'
+    output:
+      final_state: 'q0'
+      mem_cache_value:
+      tape_output: 'b'
+      tape_displacement: R
 
-  # Estado q1: Busca siguiente 'a'
-  - current: "q1"
-    read: "a"
-    write: "X"
-    next: "q2"
-    direction: "R"
-    
-  - current: "q1"
-    read: "b"
-    write: "b"
-    next: "q1"
-    direction: "R"
-    
-  - current: "q1"
-    read: "B"
-    write: "B"
-    next: "q5"
-    direction: "L"
+  - params:
+      initial_state: 'q0'
+      mem_cache_value:
+      tape_input: '_'
+    output:
+      final_state: 'q1'
+      mem_cache_value:
+      tape_output: '_'
+      tape_displacement: L
 
-  # Estado q2: Marca posición para duplicar
-  - current: "q2"
-    read: "a"
-    write: "a"
-    next: "q2"
-    direction: "R"
-    
-  - current: "q2"
-    read: "b"
-    write: "b"
-    next: "q2"
-    direction: "R"
-    
-  - current: "q2"
-    read: "B"
-    write: "Y"
-    next: "q3"
-    direction: "L"
+  - params:
+      initial_state: 'q2'
+      mem_cache_value:
+      tape_input: 'a'
+    output:
+      final_state: 'q2'
+      mem_cache_value:
+      tape_output: 'a'
+      tape_displacement: R
 
-  # Estado q3: Mueve caracteres para hacer espacio
-  - current: "q3"
-    read: "a"
-    write: "a"
-    next: "q3"
-    direction: "L"
-    
-  - current: "q3"
-    read: "b"
-    write: "b"
-    next: "q3"
-    direction: "L"
-    
-  - current: "q3"
-    read: "X"
-    write: "a"
-    next: "q4"
-    direction: "R"
+  - params:
+      initial_state: 'q2'
+      mem_cache_value:
+      tape_input: 'b'
+    output:
+      final_state: 'q2'
+      mem_cache_value:
+      tape_output: 'b'
+      tape_displacement: R
 
-  # Estado q4: Regresa a posición original
-  - current: "q4"
-    read: "a"
-    write: "a"
-    next: "q4"
-    direction: "R"
-    
-  - current: "q4"
-    read: "b"
-    write: "b"
-    next: "q4"
-    direction: "R"
-    
-  - current: "q4"
-    read: "Y"
-    write: "a"
-    next: "q1"
-    direction: "R"
+  - params:
+      initial_state: 'q2'
+      mem_cache_value:
+      tape_input: 'X'
+    output:
+      final_state: 'q2'
+      mem_cache_value:
+      tape_output: 'X'
+      tape_displacement: R
 
-test_strings:
-  - "ababa"       # Se convertirá en "abaabaa"
-  - "aaa"         # Se convertirá en "aaaaaa"
-  - "bbbabb"      # Se convertirá en "bbbaabb"
-  - "abababa"     # Se convertirá en "aabaabaa"
-  - "bababab"     # Se convertirá en "baababaab"
+  - params:
+      initial_state: 'q2'
+      mem_cache_value:
+      tape_input: '_'
+    output:
+      final_state: 'q4'
+      mem_cache_value:
+      tape_output: 'a'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q1'
+      mem_cache_value:
+      tape_input: 'X'
+    output:
+      final_state: 'q1'
+      mem_cache_value:
+      tape_output: 'X'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q1'
+      mem_cache_value:
+      tape_input: 'a'
+    output:
+      final_state: 'q2'
+      mem_cache_value:
+      tape_output: 'X'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q1'
+      mem_cache_value:
+      tape_input: '_'
+    output:
+      final_state: 'q5'
+      mem_cache_value:
+      tape_output: '_'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q1'
+      mem_cache_value:
+      tape_input: 'b'
+    output:
+      final_state: 'q3'
+      mem_cache_value:
+      tape_output: 'X'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q3'
+      mem_cache_value:
+      tape_input: 'a'
+    output:
+      final_state: 'q3'
+      mem_cache_value:
+      tape_output: 'a'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q3'
+      mem_cache_value:
+      tape_input: 'b'
+    output:
+      final_state: 'q3'
+      mem_cache_value:
+      tape_output: 'b'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q3'
+      mem_cache_value:
+      tape_input: 'X'
+    output:
+      final_state: 'q3'
+      mem_cache_value:
+      tape_output: 'X'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q3'
+      mem_cache_value:
+      tape_input: '_'
+    output:
+      final_state: 'q4'
+      mem_cache_value:
+      tape_output: 'b'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q4'
+      mem_cache_value:
+      tape_input: 'a'
+    output:
+      final_state: 'q4'
+      mem_cache_value:
+      tape_output: 'a'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q4'
+      mem_cache_value:
+      tape_input: 'b'
+    output:
+      final_state: 'q4'
+      mem_cache_value:
+      tape_output: 'b'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q4'
+      mem_cache_value:
+      tape_input: 'X'
+    output:
+      final_state: 'q1'
+      mem_cache_value:
+      tape_output: 'X'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q5'
+      mem_cache_value:
+      tape_input: 'X'
+    output:
+      final_state: 'q5'
+      mem_cache_value:
+      tape_output: '_'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q5'
+      mem_cache_value:
+      tape_input: 'b'
+    output:
+      final_state: 'q6'
+      mem_cache_value:
+      tape_output: 'b'
+      tape_displacement: S
+
+  - params:
+      initial_state: 'q5'
+      mem_cache_value:
+      tape_input: 'a'
+    output:
+      final_state: 'q6'
+      mem_cache_value:
+      tape_output: 'a'
+      tape_displacement: S
+
+
+
+# Cadenas a ser simuladas por su MT luego de parsearla y generarla
+simulation_strings:
+- aaaab
+- abbaa
+- bbbab
+- jabba
+- aabban

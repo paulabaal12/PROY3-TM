@@ -1,6 +1,6 @@
-import yaml
-from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Set, Tuple, Optional
+import yaml
 from enum import Enum
 import time
 from colorama import init, Fore, Style
@@ -14,19 +14,26 @@ class Direction(Enum):
     STAY = 'S'
 
 @dataclass
-class TransitionFunction:
+class Configuration:
+    """Represents the current configuration of the Turing Machine"""
+    state: str
+    head_position: int
+    tape: List[str]
+
+@dataclass
+class TransitionRule:
+    """Represents a single transition rule"""
     next_state: str
     write_symbol: str
     direction: Direction
 
 class TuringMachine:
     def __init__(self, config_file: str):
+        """Initialize Turing Machine from YAML configuration"""
         with open(config_file, 'r') as file:
             config = yaml.safe_load(file)
-            
-        # Validate configuration
-        self._validate_config(config)
-            
+        
+        # Basic components
         self.states = set(config['states'])
         self.input_alphabet = set(config['input_alphabet'])
         self.tape_alphabet = set(config['tape_alphabet'])
@@ -34,151 +41,130 @@ class TuringMachine:
         self.final_states = set(config['final_states'])
         self.blank_symbol = config['blank_symbol']
         self.transitions = self._parse_transitions(config['transitions'])
-        self.test_strings = config['test_strings']
+        self.test_strings = config.get('test_strings', [])
 
-    def _validate_config(self, config: dict) -> None:
-        """Validate the configuration file structure and contents."""
-        required_keys = ['states', 'input_alphabet', 'tape_alphabet', 'initial_state',
-                        'final_states', 'blank_symbol', 'transitions', 'test_strings']
-        
-        # Check for required keys
-        for key in required_keys:
-            if key not in config:
-                raise ValueError(f"Missing required configuration key: {key}")
-        
-        # Validate relationships between sets
-        if not set(config['input_alphabet']).issubset(set(config['tape_alphabet'])):
-            raise ValueError("Input alphabet must be subset of tape alphabet")
-        
-        if config['initial_state'] not in config['states']:
-            raise ValueError("Initial state must be in states set")
-            
-        if not set(config['final_states']).issubset(set(config['states'])):
-            raise ValueError("Final states must be subset of states")
-
-    def _parse_transitions(self, transitions: dict) -> Dict[Tuple[str, str], TransitionFunction]:
-        parsed = {}
-        for transition in transitions:
-            current_state = transition['current']
-            read_symbol = transition['read']
-            
-            # Validate transition
-            if current_state not in self.states:
-                raise ValueError(f"Invalid state in transition: {current_state}")
-            if read_symbol not in self.tape_alphabet:
-                raise ValueError(f"Invalid symbol in transition: {read_symbol}")
-                
-            key = (current_state, read_symbol)
-            parsed[key] = TransitionFunction(
-                transition['next'],
-                transition['write'],
-                Direction(transition['direction'])
+    def _parse_transitions(self, transitions: List[dict]) -> Dict[Tuple[str, str], TransitionRule]:
+        """Parse transition rules from configuration"""
+        rules = {}
+        for t in transitions:
+            key = (t['current'], t['read'])
+            rules[key] = TransitionRule(
+                t['next'],
+                t['write'],
+                Direction(t['direction'])
             )
-        return parsed
+        return rules
 
-    def simulate(self, input_string: str) -> Tuple[bool, List[str]]:
-        # Validate input string
+    def _create_initial_tape(self, input_string: str) -> List[str]:
+        """Create initial tape configuration with input string"""
+        # Add padding on both sides
+        padding = [self.blank_symbol] * 50
+        tape = padding + list(input_string) + padding
+        return tape
+
+    def _get_displayable_tape(self, tape: List[str], head_pos: int) -> str:
+        """Create a visual representation of the tape"""
+        # Find bounds of non-blank portion
+        left = max(0, head_pos - 10)
+        right = min(len(tape), head_pos + 11)
+        
+        display = []
+        for i in range(left, right):
+            if i == head_pos:
+                display.append(f"{Fore.GREEN}[{tape[i]}]{Style.RESET_ALL}")
+            else:
+                display.append(tape[i])
+        
+        return " ".join(display)
+
+    def run(self, input_string: str) -> Tuple[bool, List[str]]:
+        """Run the Turing Machine on an input string"""
+        # Validate input
         if not all(c in self.input_alphabet for c in input_string):
             raise ValueError(f"Invalid input string: {input_string}")
-            
-        # Initialize tape with input string and blanks on both sides
-        tape = [self.blank_symbol] * 100
-        head_position = 50  # Start in the middle
-        
-        # Place input string on tape
-        for i, symbol in enumerate(input_string):
-            tape[head_position + i] = symbol
-            
+
+        # Initialize configuration
+        tape = self._create_initial_tape(input_string)
+        head_pos = 50  # Start at beginning of input
         current_state = self.initial_state
         steps = []
-        max_steps = 1000  # Prevent infinite loops
+
+        print(f"\n{Fore.CYAN}Starting simulation for input: {input_string}{Style.RESET_ALL}")
         
-        for step in range(max_steps):
-            # Create instantaneous description
-            id_description = self._create_id(tape, head_position, current_state)
-            steps.append(id_description)
+        max_steps = 1000  # Prevent infinite loops
+        step_count = 0
+
+        while step_count < max_steps:
+            # Record current configuration
+            current_config = f"Step {step_count}: State {current_state}\n"
+            current_config += self._get_displayable_tape(tape, head_pos)
+            steps.append(current_config)
             
-            # Get current symbol under head
-            current_symbol = tape[head_position]
-            
-            # Look up transition
+            # Check if in final state
+            if current_state in self.final_states:
+                print(f"{Fore.GREEN}String accepted in state: {current_state}{Style.RESET_ALL}")
+                return True, steps
+
+            # Get current symbol and transition
+            current_symbol = tape[head_pos]
             transition_key = (current_state, current_symbol)
+
             if transition_key not in self.transitions:
-                steps.append(f"No transition found for state {current_state} and symbol {current_symbol}")
+                print(f"{Fore.RED}No transition found for state {current_state} and symbol {current_symbol}{Style.RESET_ALL}")
                 return False, steps
-                
+
             # Apply transition
             transition = self.transitions[transition_key]
-            tape[head_position] = transition.write_symbol
+            tape[head_pos] = transition.write_symbol
             current_state = transition.next_state
-            
+
             # Move head
             if transition.direction == Direction.RIGHT:
-                head_position += 1
+                head_pos += 1
             elif transition.direction == Direction.LEFT:
-                head_position -= 1
-                
-            # Check if we've reached a final state
-            if current_state in self.final_states:
-                steps.append(self._create_id(tape, head_position, current_state))
-                return True, steps
-                
-        steps.append("Maximum steps reached - halting")
+                head_pos -= 1
+
+            step_count += 1
+            time.sleep(0.2)  # Add delay for visualization
+
+        print(f"{Fore.RED}Maximum steps reached{Style.RESET_ALL}")
         return False, steps
 
-    def _create_id(self, tape: List[str], head_position: int, current_state: str) -> str:
-        """Create a visual representation of the current configuration."""
-        # Find the bounds of the non-blank portion of the tape
-        left_bound = 0
-        right_bound = len(tape) - 1
-        
-        while left_bound < len(tape) and tape[left_bound] == self.blank_symbol:
-            left_bound += 1
-        while right_bound >= 0 and tape[right_bound] == self.blank_symbol:
-            right_bound -= 1
-            
-        # Ensure we show at least 5 cells on either side of the head
-        left_bound = min(left_bound, head_position - 5)
-        right_bound = max(right_bound, head_position + 5)
-        
-        # Create the tape visualization
-        tape_segment = tape[left_bound:right_bound + 1]
-        head_offset = head_position - left_bound
-        
-        # Build the string representation
-        tape_str = ' '.join(tape_segment)
-        head_marker = ' ' * (head_offset * 2) + '↓'
-        state_info = f"State: {Fore.GREEN}{current_state}{Style.RESET_ALL}"
-        
-        return f"{state_info}\n{tape_str}\n{head_marker}"
-
     def run_all_tests(self):
-        print(f"{Fore.CYAN}Starting Turing Machine Simulation...{Style.RESET_ALL}")
-        print("="*40)
-        
-        for i, test_string in enumerate(self.test_strings, 1):
-            print(f"\n{Fore.YELLOW}Testing string #{i}: '{test_string}'{Style.RESET_ALL}")
+        """Run all test strings from configuration"""
+        print(f"{Fore.CYAN}Starting Turing Machine tests...{Style.RESET_ALL}")
+        print("="*50)
+
+        for test_string in self.test_strings:
+            print(f"\n{Fore.YELLOW}Testing string: {test_string}{Style.RESET_ALL}")
             try:
-                accepted, steps = self.simulate(test_string)
-                
-                print("\nSimulation steps:")
+                accepted, steps = self.run(test_string)
                 for step in steps:
                     print(step)
-                    time.sleep(0.5)  # Add delay for better visualization
-                    
+                    print("-"*50)
+                
                 result = f"{Fore.GREEN}ACCEPTED{Style.RESET_ALL}" if accepted else f"{Fore.RED}REJECTED{Style.RESET_ALL}"
-                print(f"\nResult: {result}")
-                print("="*40)
+                print(f"\nResult for {test_string}: {result}")
+                print("="*50)
                 
             except ValueError as e:
                 print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
 
+
 def main():
     try:
-        tm = TuringMachine("turing_config.yaml")
-        tm.run_all_tests()
+        # Probar MT Reconocedora
+        print("\n=== MT Reconocedora ===")
+        tm_reconocedora = TuringMachine("mt_reconocedora.yaml")
+        tm_reconocedora.run_all_tests()
+
+        # Probar MT Alteradora
+        print("\n=== MT Alteradora ===")
+        tm_alteradora = TuringMachine("mt_alteradora.yaml")
+        tm_alteradora.run_all_tests()
+
     except Exception as e:
-        print(f"{Fore.RED}Error loading or running Turing Machine: {e}{Style.RESET_ALL}")
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
 
 if __name__ == "__main__":
     main()

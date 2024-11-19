@@ -1,0 +1,114 @@
+# MT Reconocedora: Reconoce cadenas de la forma a^n b^n donde n >= 1
+states:
+  - q0    # Estado inicial: verifica primer 'a'
+  - q1    # Marca 'a' y busca 'b' correspondiente
+  - q2    # Marca 'b' y regresa a buscar siguiente 'a'
+  - q3    # Estado de verificación final
+  - q4    # Estado de aceptación
+  - qr    # Estado de rechazo
+
+input_alphabet:
+  - "a"
+  - "b"
+
+tape_alphabet:
+  - "a"
+  - "b"
+  - "X"  # Para marcar símbolos procesados
+  - "Y"  # Para marcar símbolos procesados
+  - "B"  # Símbolo blanco
+
+blank_symbol: "B"
+initial_state: "q0"
+final_states: 
+  - "q4"  # Estado de aceptación
+
+transitions:
+  # Estado q0: Verifica que comience con 'a'
+  - current: "q0"
+    read: "a"
+    write: "X"
+    next: "q1"
+    direction: "R"
+  - current: "q0"
+    read: "b"
+    write: "b"
+    next: "qr"
+    direction: "R"
+  - current: "q0"
+    read: "B"
+    write: "B"
+    next: "qr"
+    direction: "R"
+
+  # Estado q1: Busca 'b' correspondiente
+  - current: "q1"
+    read: "a"
+    write: "a"
+    next: "q1"
+    direction: "R"
+  - current: "q1"
+    read: "b"
+    write: "Y"
+    next: "q2"
+    direction: "L"
+  - current: "q1"
+    read: "Y"
+    write: "Y"
+    next: "q1"
+    direction: "R"
+  - current: "q1"
+    read: "B"
+    write: "B"
+    next: "qr"
+    direction: "L"
+
+  # Estado q2: Regresa a buscar siguiente 'a'
+  - current: "q2"
+    read: "a"
+    write: "a"
+    next: "q2"
+    direction: "L"
+  - current: "q2"
+    read: "X"
+    write: "X"
+    next: "q0"
+    direction: "R"
+  - current: "q2"
+    read: "Y"
+    write: "Y"
+    next: "q2"
+    direction: "L"
+
+  # Estado q3: Verificación final
+  - current: "q3"
+    read: "X"
+    write: "X"
+    next: "q3"
+    direction: "R"
+  - current: "q3"
+    read: "Y"
+    write: "Y"
+    next: "q3"
+    direction: "R"
+  - current: "q3"
+    read: "B"
+    write: "B"
+    next: "q4"
+    direction: "S"
+
+  # Transiciones especiales
+  - current: "q0"
+    read: "Y"
+    write: "Y"
+    next: "q3"
+    direction: "R"
+
+test_strings:
+  - "aabb"      # Debe ser aceptada
+  - "aaabbb"    # Debe ser aceptada
+  - "abb"       # Debe ser rechazada
+  - "aabbb"     # Debe ser rechazada
+  - "abab"      # Debe ser rechazada
+  - "aaaabbbb"  # Debe ser aceptada
+

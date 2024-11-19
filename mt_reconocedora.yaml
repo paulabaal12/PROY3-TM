@@ -14,14 +14,14 @@ input_alphabet:
 tape_alphabet:
   - "a"
   - "b"
-  - "X"  # Para marcar símbolos procesados
-  - "Y"  # Para marcar símbolos procesados
-  - "B"  # Símbolo blanco
+  - "X"    # Para marcar 'a's procesados
+  - "Y"    # Para marcar 'b's procesados
+  - "B"    # Símbolo blanco
 
 blank_symbol: "B"
 initial_state: "q0"
 final_states: 
-  - "q4"  # Estado de aceptación
+  - "q4"    # Estado de aceptación
 
 transitions:
   # Estado q0: Verifica que comience con 'a'
@@ -30,11 +30,13 @@ transitions:
     write: "X"
     next: "q1"
     direction: "R"
+  
   - current: "q0"
     read: "b"
     write: "b"
     next: "qr"
     direction: "R"
+    
   - current: "q0"
     read: "B"
     write: "B"
@@ -47,16 +49,19 @@ transitions:
     write: "a"
     next: "q1"
     direction: "R"
+    
   - current: "q1"
     read: "b"
     write: "Y"
     next: "q2"
     direction: "L"
+    
   - current: "q1"
     read: "Y"
     write: "Y"
     next: "q1"
     direction: "R"
+    
   - current: "q1"
     read: "B"
     write: "B"
@@ -69,11 +74,13 @@ transitions:
     write: "a"
     next: "q2"
     direction: "L"
+    
   - current: "q2"
     read: "X"
     write: "X"
     next: "q0"
     direction: "R"
+    
   - current: "q2"
     read: "Y"
     write: "Y"
@@ -86,11 +93,13 @@ transitions:
     write: "X"
     next: "q3"
     direction: "R"
+    
   - current: "q3"
     read: "Y"
     write: "Y"
     next: "q3"
     direction: "R"
+    
   - current: "q3"
     read: "B"
     write: "B"
@@ -105,10 +114,8 @@ transitions:
     direction: "R"
 
 test_strings:
-  - "aabb"      # Debe ser aceptada
-  - "aaabbb"    # Debe ser aceptada
-  - "abb"       # Debe ser rechazada
-  - "aabbb"     # Debe ser rechazada
-  - "abab"      # Debe ser rechazada
-  - "aaaabbbb"  # Debe ser aceptada
-
+  - "aaabbb"     # Debe ser aceptada (n=3)
+  - "aaaaabbbbbb" # Debe ser rechazada (n≠m)
+  - "abababab"    # Debe ser rechazada (formato incorrecto)
+  - "aaaabbbb"    # Debe ser aceptada (n=4)
+  - "aabb"        # Debe ser aceptada (n=2)

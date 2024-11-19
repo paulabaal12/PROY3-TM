@@ -1,12 +1,12 @@
-# MT Alteradora: Invierte una cadena de a's y b's
+# MT Alteradora: Duplica todas las 'a' en una cadena
 states:
-  - q0    # Estado inicial: marca inicio
-  - q1    # Busca último carácter
-  - q2    # Marca último carácter y regresa
-  - q3    # Busca siguiente carácter a mover
-  - q4    # Regresa al inicio
-  - q5    # Limpieza final
-  - q6    # Estado de aceptación
+  - q0    # Estado inicial
+  - q1    # Busca la siguiente 'a'
+  - q2    # Marca posición para duplicar
+  - q3    # Busca espacio para insertar
+  - q4    # Regresa a posición original
+  - q5    # Estado de aceptación
+  - qr    # Estado de rechazo
 
 input_alphabet:
   - "a"
@@ -15,116 +15,114 @@ input_alphabet:
 tape_alphabet:
   - "a"
   - "b"
-  - "X"  # Marca posición inicial
-  - "Y"  # Marca caracteres procesados
-  - "B"  # Símbolo blanco
+  - "X"    # Marca posición actual
+  - "Y"    # Marca posición de inserción
+  - "B"    # Símbolo blanco
 
 blank_symbol: "B"
 initial_state: "q0"
-final_states:
-  - "q6"
+final_states: 
+  - "q5"    # Estado de aceptación
 
 transitions:
-  # Estado q0: Marca inicio
+  # Estado q0: Inicio
   - current: "q0"
     read: "a"
     write: "X"
     next: "q1"
     direction: "R"
+    
   - current: "q0"
     read: "b"
-    write: "X"
-    next: "q1"
-    direction: "R"
-
-  # Estado q1: Busca final de la cadena
-  - current: "q1"
-    read: "a"
-    write: "a"
-    next: "q1"
-    direction: "R"
-  - current: "q1"
-    read: "b"
     write: "b"
     next: "q1"
     direction: "R"
-  - current: "q1"
+    
+  - current: "q0"
     read: "B"
     write: "B"
-    next: "q2"
-    direction: "L"
-
-  # Estado q2: Marca último carácter y regresa
-  - current: "q2"
-    read: "a"
-    write: "Y"
-    next: "q3"
-    direction: "L"
-  - current: "q2"
-    read: "b"
-    write: "Y"
-    next: "q3"
-    direction: "L"
-  - current: "q2"
-    read: "Y"
-    write: "Y"
-    next: "q2"
-    direction: "L"
-
-  # Estado q3: Busca siguiente carácter a mover
-  - current: "q3"
-    read: "a"
-    write: "a"
-    next: "q3"
-    direction: "L"
-  - current: "q3"
-    read: "b"
-    write: "b"
-    next: "q3"
-    direction: "L"
-  - current: "q3"
-    read: "X"
-    write: "X"
-    next: "q4"
-    direction: "R"
-  - current: "q3"
-    read: "Y"
-    write: "Y"
-    next: "q3"
-    direction: "L"
-
-  # Estado q4: Mueve al inicio para siguiente ciclo
-  - current: "q4"
-    read: "a"
-    write: "X"
-    next: "q1"
-    direction: "R"
-  - current: "q4"
-    read: "b"
-    write: "X"
-    next: "q1"
-    direction: "R"
-  - current: "q4"
-    read: "Y"
-    write: "Y"
     next: "q5"
-    direction: "R"
-
-  # Estado q5: Limpieza final
-  - current: "q5"
-    read: "Y"
-    write: "B"
-    next: "q5"
-    direction: "R"
-  - current: "q5"
-    read: "B"
-    write: "B"
-    next: "q6"
     direction: "S"
 
+  # Estado q1: Busca siguiente 'a'
+  - current: "q1"
+    read: "a"
+    write: "X"
+    next: "q2"
+    direction: "R"
+    
+  - current: "q1"
+    read: "b"
+    write: "b"
+    next: "q1"
+    direction: "R"
+    
+  - current: "q1"
+    read: "B"
+    write: "B"
+    next: "q5"
+    direction: "L"
+
+  # Estado q2: Marca posición para duplicar
+  - current: "q2"
+    read: "a"
+    write: "a"
+    next: "q2"
+    direction: "R"
+    
+  - current: "q2"
+    read: "b"
+    write: "b"
+    next: "q2"
+    direction: "R"
+    
+  - current: "q2"
+    read: "B"
+    write: "Y"
+    next: "q3"
+    direction: "L"
+
+  # Estado q3: Mueve caracteres para hacer espacio
+  - current: "q3"
+    read: "a"
+    write: "a"
+    next: "q3"
+    direction: "L"
+    
+  - current: "q3"
+    read: "b"
+    write: "b"
+    next: "q3"
+    direction: "L"
+    
+  - current: "q3"
+    read: "X"
+    write: "a"
+    next: "q4"
+    direction: "R"
+
+  # Estado q4: Regresa a posición original
+  - current: "q4"
+    read: "a"
+    write: "a"
+    next: "q4"
+    direction: "R"
+    
+  - current: "q4"
+    read: "b"
+    write: "b"
+    next: "q4"
+    direction: "R"
+    
+  - current: "q4"
+    read: "Y"
+    write: "a"
+    next: "q1"
+    direction: "R"
+
 test_strings:
-  - "ababa"     # Se convertirá en "ababa"
-  - "aabbcc"    # Se convertirá en "ccbbaa"
-  - "aaaaa"     # Se convertirá en "aaaaa"
-  - "abcde"     # Se convertirá en "edcba"
-  - "12345"     # Se convertirá en "54321"
+  - "ababa"       # Se convertirá en "abaabaa"
+  - "aaa"         # Se convertirá en "aaaaaa"
+  - "bbbabb"      # Se convertirá en "bbbaabb"
+  - "abababa"     # Se convertirá en "aabaabaa"
+  - "bababab"     # Se convertirá en "baababaab"

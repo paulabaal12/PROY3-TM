@@ -22,7 +22,7 @@ tape_alphabet:
 
 # Función de transición
 delta:
-  # Desde q0, buscar una 'a' sin marcar
+  # Desde q0
   - params:
       initial_state: 'q0'
       tape_input: 'a'
@@ -31,7 +31,6 @@ delta:
       tape_output: 'X'
       tape_displacement: R
 
-  # Desde q0, buscar una 'b' sin marcar
   - params:
       initial_state: 'q0'
       tape_input: 'b'
@@ -40,7 +39,6 @@ delta:
       tape_output: 'b'
       tape_displacement: S
 
-  # Desde q0, si llegamos al final y todo está marcado, aceptar
   - params:
       initial_state: 'q0'
       tape_input: '_'
@@ -49,7 +47,15 @@ delta:
       tape_output: '_'
       tape_displacement: S
 
-  # En q1, ignorar símbolos marcados
+  - params:
+      initial_state: 'q0'
+      tape_input: 'X'
+    output:
+      final_state: 'q0'
+      tape_output: 'X'
+      tape_displacement: R
+
+  # Desde q1
   - params:
       initial_state: 'q1'
       tape_input: 'X'
@@ -58,7 +64,6 @@ delta:
       tape_output: 'X'
       tape_displacement: R
 
-  # En q1, encontrar una 'b' para cancelar la 'a'
   - params:
       initial_state: 'q1'
       tape_input: 'b'
@@ -67,7 +72,6 @@ delta:
       tape_output: 'X'
       tape_displacement: L
 
-  # En q1, si llegamos al final sin encontrar 'b', rechazar
   - params:
       initial_state: 'q1'
       tape_input: '_'
@@ -76,7 +80,15 @@ delta:
       tape_output: '_'
       tape_displacement: S
 
-  # En q2, regresar al inicio
+  - params:
+      initial_state: 'q1'
+      tape_input: 'a'
+    output:
+      final_state: 'q4'
+      tape_output: 'a'
+      tape_displacement: S
+
+  # Desde q2
   - params:
       initial_state: 'q2'
       tape_input: 'X'
@@ -85,7 +97,6 @@ delta:
       tape_output: 'X'
       tape_displacement: L
 
-  # En q2, al encontrar espacio en blanco, volver a empezar
   - params:
       initial_state: 'q2'
       tape_input: '_'

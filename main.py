@@ -308,7 +308,7 @@ def GetTuringMachineAttr(filename):
 
     return alphabet, input_symbols, states, initial_state, accepting_states, transition_function, simulation_strings
 
-def create_turing_machine_diagram(yaml_file, output_filename):
+def create_turing_machine_diagram(yaml_file, output_filename): 
     """
     Create a Graphviz visualization of a Turing Machine from a YAML configuration.
     """
@@ -321,7 +321,7 @@ def create_turing_machine_diagram(yaml_file, output_filename):
         engine='dot',
         graph_attr={
             'rankdir': 'LR', 
-            'bgcolor': 'transparent',
+            'bgcolor': 'white',  # Fondo blanco
             'fontname': 'Arial',
             'fontsize': '10',
             'label': f'Máquina de Turing: {yaml_file}'
@@ -362,9 +362,11 @@ def create_turing_machine_diagram(yaml_file, output_filename):
         direction = transition['output']['tape_displacement']
         edge_label = f"{input_symbol} → {output_symbol} ({direction})"
         dot.edge(src_state, dst_state, label=edge_label, color='purple')
+    
     output_path = f"{output_filename}"
     dot.render(output_path, cleanup=True)
     print(f"{Fore.GREEN}✅ Diagrama generado: {output_path}.png{Style.RESET_ALL}")
+
 
 def Main():
     """

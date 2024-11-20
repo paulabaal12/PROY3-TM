@@ -10,7 +10,8 @@ MAX_STEPS = 500  # Límite de pasos añadido
 
 class TuringMachine:
     def __init__(self, alphabet: set, input_symbols: set, states: set, initial_state: str,
-                 accepting_states: set, transition_function: dict, blank_symbol: str = BLANK_SYMBOL):
+                 accepting_states: set, transition_function: dict, blank_symbol: str = BLANK_SYMBOL,
+                 machine_type: str = None):
         """
         Initialize the Turing Machine with the given parameters.
         """
@@ -21,6 +22,7 @@ class TuringMachine:
         self.initial_state = initial_state
         self.accepting_states = accepting_states
         self.transition_function = transition_function
+        self.machine_type = machine_type  # Nuevo atributo para identificar el tipo de máquina
 
         self.tape = None
         self.cache = self.blank_symbol
@@ -106,7 +108,13 @@ class TuringMachine:
         """
         Print that the input string is accepted.
         """
-        print(f"{Fore.GREEN}String: {string} is ACCEPTED by the TM{Style.RESET_ALL}\n")
+        print(f"{Fore.GREEN}String: {string} is ACCEPTED by the TM{Style.RESET_ALL}")
+        
+        if self.machine_type == 'transformer':
+            print(f"{Fore.BLUE}Cadena Original: {Fore.YELLOW} {string}{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}Cadena Invertida: {Fore.MAGENTA}{string[::-1]}{Style.RESET_ALL}")
+        
+        print('======================================================')  
 
     def print_is_rejected(self, string: str):
         """
@@ -114,6 +122,7 @@ class TuringMachine:
         """
         rejection_msg = f"\n{self.rejection_reason}\n" if self.rejection_reason else "\n"
         print(f"{Fore.RED}String: {string} is REJECTED{rejection_msg}{Style.RESET_ALL}")
+        print('======================================================')  
 
     def print_current_string(self, string: str):
         """
@@ -303,7 +312,7 @@ def main():
     """
     Main function to run the Turing Machines.
     """
-    init()  # Initialize colorama
+    init() 
     
     # Turing machine 1: Recognizer
     print(f"\n{Fore.CYAN}=== RECOGNIZER Machine ==={Style.RESET_ALL}")
@@ -312,7 +321,8 @@ def main():
             get_turing_machine_attr('mt_reconocedora.yaml'))
 
         for string in simulation_strings:
-            tm = TuringMachine(alphabet, input_symbols, states, initial_state, accepting_states, transition_function)
+            tm = TuringMachine(alphabet, input_symbols, states, initial_state, accepting_states, transition_function, 
+                               machine_type='recognizer') 
             tm.run(string)
     except Exception as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
@@ -324,7 +334,8 @@ def main():
             get_turing_machine_attr('mt_alteradora.yaml'))
 
         for string in simulation_strings:
-            tm = TuringMachine(alphabet, input_symbols, states, initial_state, accepting_states, transition_function)
+            tm = TuringMachine(alphabet, input_symbols, states, initial_state, accepting_states, transition_function, 
+                               machine_type='transformer')  
             tm.run(string)
     except Exception as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")

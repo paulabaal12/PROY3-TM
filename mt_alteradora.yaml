@@ -235,6 +235,9 @@ delta:
 
 # Cadenas a ser simuladas por su MT luego de parsearla y generarla
 simulation_strings:
-- aaaab
+- aaaab 
 - abbaa
 - bbbab
+- bbaaa
+- jabba
+- aabban

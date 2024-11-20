@@ -30,16 +30,16 @@ class TuringMachine:
         self.rejection_reason = None
         self.steps_count = 0  # Contador de pasos añadido
 
-    def run(self, input_string: str):
+    def Run(self, input_string: str):
         """
         Run the Turing Machine on the given input string.
         """
         self.tape = Tape(input_string, self.blank_symbol)
-        self.print_current_string(input_string)
+        self.PrintCurrentString(input_string)
         self.steps_count = 0  # Reiniciar contador de pasos
 
         while self.current_state not in self.accepting_states:
-            self.print_instant_description()
+            self.PrintInstantDescription()
 
             # Verificar límite de pasos
             self.steps_count += 1
@@ -47,8 +47,8 @@ class TuringMachine:
                 self.rejection_reason = f"Máximo de {MAX_STEPS} pasos excedido"
                 break
 
-            curr_char = self.tape.get_current()
-            new_state, new_cache, tape_output, head_direction = self.get_transition(
+            curr_char = self.tape.GetCurrent()
+            new_state, new_cache, tape_output, head_direction = self.GetTransition(
                 self.current_state, curr_char, self.cache)
             
             if new_state is None:
@@ -57,19 +57,19 @@ class TuringMachine:
 
             self.current_state = new_state
             self.cache = new_cache
-            self.tape.write(tape_output)
+            self.tape.Write(tape_output)
 
             if head_direction == RIGHT:
-                self.tape.go_right()
+                self.tape.GoRight()
             elif head_direction == LEFT:
-                self.tape.go_left()
+                self.tape.GoLeft()
 
         if self.current_state in self.accepting_states:
-            self.print_is_accepted(input_string)
+            self.PrintIsAccepted(input_string)
         else:
-            self.print_is_rejected(input_string)
+            self.PrintIsRejected(input_string)
 
-    def get_transition(self, state, tape_value, cache_value):
+    def GetTransition(self, state, tape_value, cache_value):
         """
         Get the transition for the given state, tape value, and cache value.
         """
@@ -86,13 +86,13 @@ class TuringMachine:
         else:
             return None, None, None, None
 
-    def print_instant_description(self):
+    def PrintInstantDescription(self):
         """
         Print the current state and tape content with custom coloring.
         """
-        left_side = self.tape.get_left_side()
-        right_side = self.tape.get_right_side()
-        current_char = self.tape.get_current()
+        left_side = self.tape.GetLeftSide()
+        right_side = self.tape.GetRightSide()
+        current_char = self.tape.GetCurrent()
         state_tuple = self.current_state
         cache_value = self.cache
         
@@ -104,7 +104,7 @@ class TuringMachine:
         )
         print(formatted_description)
 
-    def print_is_accepted(self, string: str):
+    def PrintIsAccepted(self, string: str):
         """
         Print that the input string is accepted.
         """
@@ -116,7 +116,7 @@ class TuringMachine:
         
         print('======================================================')  
 
-    def print_is_rejected(self, string: str):
+    def PrintIsRejected(self, string: str):
         """
         Print that the input string is rejected.
         """
@@ -124,7 +124,7 @@ class TuringMachine:
         print(f"{Fore.RED}String: {string} is REJECTED{rejection_msg}{Style.RESET_ALL}")
         print('======================================================')  
 
-    def print_current_string(self, string: str):
+    def PrintCurrentString(self, string: str):
         """
         Print the current input string.
         """
@@ -152,42 +152,42 @@ class Tape:
         self.tail = None
         self.origin = None
 
-        self._set_initial_node(string[0])
+        self.SetInitialNode(string[0])
         for char in string[1:]:
-            self._set_next(char)
-        self._return_to_origin()
+            self.SetNext(char)
+        self.ReturnToOrigin()
 
-    def go_right(self):
+    def GoRight(self):
         """
         Move the tape head to the right.
         """
         if self.current.next is None:
-            self._set_next(self.blank_symbol)
+            self.SetNext(self.blank_symbol)
         else:
             self.current = self.current.next
 
-    def go_left(self):
+    def GoLeft(self):
         """
         Move the tape head to the left.
         """
         if self.current.prev is None:
-            self._set_prev(self.blank_symbol)
+            self.SetPrev(self.blank_symbol)
         else:
             self.current = self.current.prev
 
-    def write(self, value):
+    def Write(self, value):
         """
         Write a value to the current tape cell.
         """
         self.current.char = value
 
-    def get_current(self):
+    def GetCurrent(self):
         """
         Get the current tape cell value.
         """
         return self.current.char
 
-    def get_left_side(self):
+    def GetLeftSide(self):
         """
         Get the left side of the tape from the current position.
         """
@@ -198,7 +198,7 @@ class Tape:
             current = current.prev
         return ", ".join(left)
 
-    def get_right_side(self):
+    def GetRightSide(self):
         """
         Get the right side of the tape from the current position.
         """
@@ -209,14 +209,14 @@ class Tape:
             current = current.next
         return ", ".join(right)
 
-    def _set_initial_node(self, value):
+    def SetInitialNode(self, value):
         """
         Set the initial node of the tape.
         """
         self.origin = Node(value)
         self.current = self.origin
 
-    def _set_next(self, value):
+    def SetNext(self, value):
         """
         Set the next node of the tape.
         """
@@ -226,7 +226,7 @@ class Tape:
         self.current = new_node
         self.head = self.current
 
-    def _set_prev(self, value):
+    def SetPrev(self, value):
         """
         Set the previous node of the tape.
         """
@@ -236,7 +236,7 @@ class Tape:
         self.current = new_node
         self.tail = self.current
 
-    def _return_to_origin(self):
+    def ReturnToOrigin(self):
         """
         Return the tape head to the origin.
         """
@@ -246,12 +246,12 @@ class Tape:
         """
         Return a string representation of the tape.
         """
-        right = self.get_right_side()
-        left = self.get_left_side()
+        right = self.GetRightSide()
+        left = self.GetLeftSide()
         return "[" + left + " >" + self.current.char + ", " + right + "]"
 
 
-def load_config(filename):
+def LoadConfig(filename):
     """
     Load the configuration from the given YAML file.
     """
@@ -265,24 +265,24 @@ def load_config(filename):
     return config
 
 
-def parse_config(config):
+def ParseConfig(config):
     """
     Parse the configuration into a format suitable for the Turing Machine.
     """
-    def replace_empty_with_underscore(value):
+    def ReplaceEmptyWithUnderscore(value):
         return BLANK_SYMBOL if value == 'None' or value is None else str(value)
 
     parsed_config = {}
     for t in config['delta']:
-        initial_state = replace_empty_with_underscore(str(t['params']['initial_state']))
-        cache_value = replace_empty_with_underscore(str(t['params'].get('mem_cache_value', BLANK_SYMBOL)))
-        new_cache_value = replace_empty_with_underscore(str(t['output'].get('mem_cache_value', BLANK_SYMBOL)))
-        tape_input = replace_empty_with_underscore(t['params']['tape_input'])
+        initial_state = ReplaceEmptyWithUnderscore(str(t['params']['initial_state']))
+        cache_value = ReplaceEmptyWithUnderscore(str(t['params'].get('mem_cache_value', BLANK_SYMBOL)))
+        new_cache_value = ReplaceEmptyWithUnderscore(str(t['output'].get('mem_cache_value', BLANK_SYMBOL)))
+        tape_input = ReplaceEmptyWithUnderscore(t['params']['tape_input'])
 
         state_cache_key = ((initial_state, cache_value), tape_input)
-        new_state = replace_empty_with_underscore(str(t['output']['final_state']))
-        tape_output = replace_empty_with_underscore(t['output']['tape_output'])
-        tape_displacement = replace_empty_with_underscore(t['output']['tape_displacement'])
+        new_state = ReplaceEmptyWithUnderscore(str(t['output']['final_state']))
+        tape_output = ReplaceEmptyWithUnderscore(t['output']['tape_output'])
+        tape_displacement = ReplaceEmptyWithUnderscore(t['output']['tape_displacement'])
 
         tape_values = ((new_state, new_cache_value), tape_output, tape_displacement)
         parsed_config[state_cache_key] = tape_values
@@ -290,12 +290,12 @@ def parse_config(config):
     return parsed_config
 
 
-def get_turing_machine_attr(filename):
+def GetTuringMachineAttr(filename):
     """
     Get the attributes for the Turing Machine from the configuration file.
     """
-    config = load_config(filename)
-    parsed_config = parse_config(config)
+    config = LoadConfig(filename)
+    parsed_config = ParseConfig(config)
 
     input_symbols = set(config['alphabet'])
     alphabet = set(config['tape_alphabet'])
@@ -308,7 +308,7 @@ def get_turing_machine_attr(filename):
     return alphabet, input_symbols, states, initial_state, accepting_states, transition_function, simulation_strings
 
 
-def main():
+def Main():
     """
     Main function to run the Turing Machines.
     """
@@ -318,12 +318,12 @@ def main():
     print(f"\n{Fore.CYAN}=== RECOGNIZER Machine ==={Style.RESET_ALL}")
     try:
         alphabet, input_symbols, states, initial_state, accepting_states, transition_function, simulation_strings = (
-            get_turing_machine_attr('mt_reconocedora.yaml'))
+            GetTuringMachineAttr('mt_reconocedora.yaml'))
 
         for string in simulation_strings:
             tm = TuringMachine(alphabet, input_symbols, states, initial_state, accepting_states, transition_function, 
                                machine_type='recognizer') 
-            tm.run(string)
+            tm.Run(string)
     except Exception as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
 
@@ -331,15 +331,15 @@ def main():
     print(f"\n{Fore.CYAN}=== TRANSFORMER Machine ==={Style.RESET_ALL}")
     try:
         alphabet, input_symbols, states, initial_state, accepting_states, transition_function, simulation_strings = (
-            get_turing_machine_attr('mt_alteradora.yaml'))
+            GetTuringMachineAttr('mt_alteradora.yaml'))
 
         for string in simulation_strings:
             tm = TuringMachine(alphabet, input_symbols, states, initial_state, accepting_states, transition_function, 
                                machine_type='transformer')  
-            tm.run(string)
+            tm.Run(string)
     except Exception as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
 
 
 if __name__ == "__main__":
-    main()
+    Main()

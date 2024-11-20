@@ -61,7 +61,7 @@ class TuringMachine:
 
         while True:
             x_markers = ', '.join(['X'] * head_pos)
-            steps.append(f"         →  {x_markers} [{Fore.BLUE}{current_state}{Style.RESET_ALL}, {Fore.MAGENTA}{tape[head_pos]}{Style.RESET_ALL}] {', '.join(tape[head_pos:])}")
+            steps.append(f"         ꜔  {x_markers} [{Fore.BLUE}{current_state}{Style.RESET_ALL} {Fore.MAGENTA}{tape[head_pos]}{Style.RESET_ALL}] {', '.join(tape[head_pos:])}")
             
             transition_key = (current_state, tape[head_pos])
             if transition_key not in self.config.transitions:

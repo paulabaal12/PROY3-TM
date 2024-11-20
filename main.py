@@ -6,6 +6,7 @@ import os
 BLANK_SYMBOL = "_"
 RIGHT = "R"
 LEFT = "L"
+MAX_STEPS = 500  # Límite de pasos añadido
 
 class TuringMachine:
     def __init__(self, alphabet: set, input_symbols: set, states: set, initial_state: str,
@@ -25,6 +26,7 @@ class TuringMachine:
         self.cache = self.blank_symbol
         self.current_state = initial_state
         self.rejection_reason = None
+        self.steps_count = 0  # Contador de pasos añadido
 
     def run(self, input_string: str):
         """
@@ -32,9 +34,16 @@ class TuringMachine:
         """
         self.tape = Tape(input_string, self.blank_symbol)
         self.print_current_string(input_string)
+        self.steps_count = 0  # Reiniciar contador de pasos
 
         while self.current_state not in self.accepting_states:
             self.print_instant_description()
+
+            # Verificar límite de pasos
+            self.steps_count += 1
+            if self.steps_count > MAX_STEPS:
+                self.rejection_reason = f"Máximo de {MAX_STEPS} pasos excedido"
+                break
 
             curr_char = self.tape.get_current()
             new_state, new_cache, tape_output, head_direction = self.get_transition(
@@ -77,14 +86,21 @@ class TuringMachine:
 
     def print_instant_description(self):
         """
-        Print the current state and tape content.
+        Print the current state and tape content with custom coloring.
         """
         left_side = self.tape.get_left_side()
         right_side = self.tape.get_right_side()
         current_char = self.tape.get_current()
         state_tuple = self.current_state
         cache_value = self.cache
-        print(f"{Fore.YELLOW}\t꜔  {left_side} [{state_tuple}, {cache_value}] {current_char}, {right_side}{Style.RESET_ALL}")
+        
+        # Color azul y morado para elementos dentro de []
+        formatted_description = (
+            f"\t꜔  {left_side} "
+            f"{Fore.YELLOW + Style.BRIGHT}[{Fore.MAGENTA}{state_tuple}, {Fore.BLUE}{cache_value}{Fore.YELLOW}]{Style.RESET_ALL} "
+            f"{current_char}, {right_side}{Style.RESET_ALL}"
+        )
+        print(formatted_description)
 
     def print_is_accepted(self, string: str):
         """

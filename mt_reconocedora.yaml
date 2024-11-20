@@ -1,28 +1,31 @@
 # MT Reconocedora: Verifica si una cadena tiene el mismo número de a's que b's
-# Lista de estados
 q_states:
   q_list:
-    - 'q0'  # Estado inicial
-    - 'q1'  # Buscando 'b' para cancelar una 'a'
-    - 'q2'  # Regresando al inicio
-    - 'q3'  # Estado de aceptación
-    - 'q4'  # Estado de rechazo
+    - 'q0'      # Estado inicial para marcar todo
+    - 'q1'      # Marcar siguiente símbolo
+    - 'q2'      # Buscar X
+    - 'q3'      # Buscar Y para emparejar
+    - 'q4'      # Verificar si quedan símbolos sin marcar
+    - 'q5'      # Volver al inicio para seguir buscando
+    - 'q6'      # Estado de aceptación
+    - 'q7'      # Estado de rechazo
   initial: 'q0'
-  final: 'q3'
+  final: 'q6'
 
-# Alfabetos de la MT
 alphabet:
   - a
   - b
+
 tape_alphabet:
-  - X  # Marca para símbolos ya procesados
+  - X
+  - Y
+  - Z  # Marcar pares ya contados
   - a
   - b
   - _
 
-# Función de transición
 delta:
-  # Desde q0
+  # Estado q0 - Inicio
   - params:
       initial_state: 'q0'
       tape_input: 'a'
@@ -35,96 +38,178 @@ delta:
       initial_state: 'q0'
       tape_input: 'b'
     output:
-      final_state: 'q4'
-      tape_output: 'b'
-      tape_displacement: S
+      final_state: 'q1'
+      tape_output: 'Y'
+      tape_displacement: R
 
   - params:
       initial_state: 'q0'
+      tape_input: '_'
+    output:
+      final_state: 'q2'
+      tape_output: '_'
+      tape_displacement: L
+
+  # Estado q1 - Marcar siguiente símbolo
+  - params:
+      initial_state: 'q1'
+      tape_input: 'a'
+    output:
+      final_state: 'q1'
+      tape_output: 'X'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q1'
+      tape_input: 'b'
+    output:
+      final_state: 'q1'
+      tape_output: 'Y'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q1'
+      tape_input: '_'
+    output:
+      final_state: 'q2'
+      tape_output: '_'
+      tape_displacement: L
+
+  # Estado q2 - Buscar X
+  - params:
+      initial_state: 'q2'
+      tape_input: 'X'
+    output:
+      final_state: 'q3'
+      tape_output: 'Z'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q2'
+      tape_input: 'Y'
+    output:
+      final_state: 'q2'
+      tape_output: 'Y'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q2'
+      tape_input: 'Z'
+    output:
+      final_state: 'q2'
+      tape_output: 'Z'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q2'
+      tape_input: '_'
+    output:
+      final_state: 'q4'
+      tape_output: '_'
+      tape_displacement: R
+
+  # Estado q3 - Buscar Y para emparejar
+  - params:
+      initial_state: 'q3'
+      tape_input: 'Y'
+    output:
+      final_state: 'q2'
+      tape_output: 'Z'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q3'
+      tape_input: 'X'
+    output:
+      final_state: 'q3'
+      tape_output: 'X'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q3'
+      tape_input: 'Z'
+    output:
+      final_state: 'q3'
+      tape_output: 'Z'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q3'
+      tape_input: '_'
+    output:
+      final_state: 'q5'
+      tape_output: '_'
+      tape_displacement: L
+
+  # Estado q4 - Verificar si quedan símbolos sin marcar
+  - params:
+      initial_state: 'q4'
+      tape_input: 'X'
+    output:
+      final_state: 'q7'
+      tape_output: 'X'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q4'
+      tape_input: 'Y'
+    output:
+      final_state: 'q7'
+      tape_output: 'Y'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q4'
+      tape_input: 'Z'
+    output:
+      final_state: 'q4'
+      tape_output: 'Z'
+      tape_displacement: R
+
+  - params:
+      initial_state: 'q4'
+      tape_input: '_'
+    output:
+      final_state: 'q6'
+      tape_output: '_'
+      tape_displacement: R
+
+  # Estado q5 - Volver al inicio para seguir buscando
+  - params:
+      initial_state: 'q5'
+      tape_input: 'X'
+    output:
+      final_state: 'q5'
+      tape_output: 'X'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q5'
+      tape_input: 'Y'
+    output:
+      final_state: 'q5'
+      tape_output: 'Y'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q5'
+      tape_input: 'Z'
+    output:
+      final_state: 'q5'
+      tape_output: 'Z'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q5'
       tape_input: '_'
     output:
       final_state: 'q3'
       tape_output: '_'
-      tape_displacement: S
-
-  - params:
-      initial_state: 'q0'
-      tape_input: 'X'
-    output:
-      final_state: 'q0'
-      tape_output: 'X'
       tape_displacement: R
 
-  # Desde q1
-  - params:
-      initial_state: 'q1'
-      tape_input: 'X'
-    output:
-      final_state: 'q1'
-      tape_output: 'X'
-      tape_displacement: R
-
-  - params:
-      initial_state: 'q1'
-      tape_input: 'b'
-    output:
-      final_state: 'q2'
-      tape_output: 'X'
-      tape_displacement: L
-
-  - params:
-      initial_state: 'q1'
-      tape_input: '_'
-    output:
-      final_state: 'q4'
-      tape_output: '_'
-      tape_displacement: S
-
-  - params:
-      initial_state: 'q1'
-      tape_input: 'a'
-    output:
-      final_state: 'q4'
-      tape_output: 'a'
-      tape_displacement: S
-
-  # Desde q2
-  - params:
-      initial_state: 'q2'
-      tape_input: 'X'
-    output:
-      final_state: 'q2'
-      tape_output: 'X'
-      tape_displacement: L
-
-  - params:
-      initial_state: 'q2'
-      tape_input: '_'
-    output:
-      final_state: 'q0'
-      tape_output: '_'
-      tape_displacement: R
-
-  - params:
-      initial_state: 'q2'
-      tape_input: 'a'
-    output:
-      final_state: 'q2'
-      tape_output: 'a'
-      tape_displacement: L
-
-  - params:
-      initial_state: 'q2'
-      tape_input: 'b'
-    output:
-      final_state: 'q2'
-      tape_output: 'b'
-      tape_displacement: L
-
-# Cadenas a ser simuladas por su MT
 simulation_strings:
-  - 'aabb'    # Debe aceptar
-  - 'abba'    # Debe aceptar
-  - 'aaabbb'  # Debe rechazar
-  - 'abab'    # Debe aceptar
+  - 'abbba'    # Debe rechazar
+  - 'abbaab'   # Debe aceptar
+  - 'ababab'    # Debe aceptar
   - 'aabbb'   # Debe rechazar
+  

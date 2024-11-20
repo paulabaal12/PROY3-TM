@@ -1,4 +1,5 @@
 from colorama import init, Fore, Style
+import graphviz
 import yaml
 import os
 
@@ -307,12 +308,80 @@ def GetTuringMachineAttr(filename):
 
     return alphabet, input_symbols, states, initial_state, accepting_states, transition_function, simulation_strings
 
+def create_turing_machine_diagram(yaml_file, output_filename):
+    """
+    Create a Graphviz visualization of a Turing Machine from a YAML configuration.
+    """
+    with open(yaml_file, 'r') as file:
+        config = yaml.safe_load(file)
+    
+    dot = graphviz.Digraph(
+        comment='Turing Machine State Diagram', 
+        format='png',
+        engine='dot',
+        graph_attr={
+            'rankdir': 'LR', 
+            'bgcolor': 'transparent',
+            'fontname': 'Arial',
+            'fontsize': '10',
+            'label': f'Máquina de Turing: {yaml_file}'
+        },
+        node_attr={
+            'shape': 'circle',
+            'style': 'filled',
+            'fontname': 'Arial',
+            'fontsize': '10'
+        },
+        edge_attr={
+            'fontname': 'Courier',
+            'fontsize': '8'
+        }
+    )
+
+    # Set colors for special states
+    initial_state = config['q_states']['initial']
+    final_state = config['q_states']['final']
+
+    # Collect all unique states
+    states = set(config['q_states']['q_list'])
+
+    # Add nodes
+    for state in states:
+        if state == initial_state:
+            dot.node(state, state, shape='doublecircle', fillcolor='lightgreen', color='green')
+        elif state == final_state:
+            dot.node(state, state, shape='doublecircle', fillcolor='lightblue', color='blue')
+        else:
+            dot.node(state, state, fillcolor='lightgray', color='gray')
+
+    for transition in config['delta']:
+        src_state = str(transition['params']['initial_state'])
+        dst_state = str(transition['output']['final_state'])
+        input_symbol = str(transition['params']['tape_input'])
+        output_symbol = str(transition['output']['tape_output'])
+        direction = transition['output']['tape_displacement']
+        edge_label = f"{input_symbol} → {output_symbol} ({direction})"
+        dot.edge(src_state, dst_state, label=edge_label, color='purple')
+    output_path = f"{output_filename}"
+    dot.render(output_path, cleanup=True)
+    print(f"{Fore.GREEN}✅ Diagrama generado: {output_path}.png{Style.RESET_ALL}")
 
 def Main():
     """
-    Main function to run the Turing Machines.
+    Main function to run the Turing Machines and generate their diagrams.
     """
     init() 
+
+    try:
+        import graphviz
+    except ImportError:
+        print(f"{Fore.RED}❌ Por favor instala Graphviz: pip install graphviz{Style.RESET_ALL}")
+        return
+    
+    # Generar diagramas de máquinas de Turing
+    print(f"\n{Fore.CYAN}=== GENERANDO DIAGRAMAS DE MÁQUINAS DE TURING ==={Style.RESET_ALL}")
+    create_turing_machine_diagram('mt_reconocedora.yaml', 'recognizer_tm_diagram')
+    create_turing_machine_diagram('mt_alteradora.yaml', 'transformer_tm_diagram')
     
     # Turing machine 1: Recognizer
     print(f"\n{Fore.CYAN}=== RECOGNIZER Machine ==={Style.RESET_ALL}")
@@ -340,6 +409,4 @@ def Main():
     except Exception as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
 
-
-if __name__ == "__main__":
-    Main()
+Main()

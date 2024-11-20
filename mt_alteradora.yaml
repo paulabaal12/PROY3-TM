@@ -19,6 +19,7 @@ tape_alphabet:
 - X
 - a
 - b
+- _
 
 # Función de transición
 delta:
@@ -231,8 +232,6 @@ delta:
       mem_cache_value:
       tape_output: 'a'
       tape_displacement: S
-
-
 
 # Cadenas a ser simuladas por su MT luego de parsearla y generarla
 simulation_strings:

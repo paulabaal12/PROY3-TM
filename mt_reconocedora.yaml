@@ -105,6 +105,22 @@ delta:
       tape_output: '_'
       tape_displacement: R
 
+  - params:
+      initial_state: 'q2'
+      tape_input: 'a'
+    output:
+      final_state: 'q2'
+      tape_output: 'a'
+      tape_displacement: L
+
+  - params:
+      initial_state: 'q2'
+      tape_input: 'b'
+    output:
+      final_state: 'q2'
+      tape_output: 'b'
+      tape_displacement: L
+
 # Cadenas a ser simuladas por su MT
 simulation_strings:
   - 'aabb'    # Debe aceptar

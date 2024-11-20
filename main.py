@@ -7,7 +7,7 @@ import os
 BLANK_SYMBOL = "_"
 RIGHT = "R"
 LEFT = "L"
-MAX_STEPS = 500  # Límite de pasos añadido
+MAX_STEPS = 500  
 
 class TuringMachine:
     def __init__(self, alphabet: set, input_symbols: set, states: set, initial_state: str,
@@ -321,7 +321,7 @@ def create_turing_machine_diagram(yaml_file, output_filename):
         engine='dot',
         graph_attr={
             'rankdir': 'LR', 
-            'bgcolor': 'white',  # Fondo blanco
+            'bgcolor': 'white',
             'fontname': 'Arial',
             'fontsize': '10',
             'label': f'Máquina de Turing: {yaml_file}'
@@ -338,14 +338,10 @@ def create_turing_machine_diagram(yaml_file, output_filename):
         }
     )
 
-    # Set colors for special states
     initial_state = config['q_states']['initial']
     final_state = config['q_states']['final']
 
-    # Collect all unique states
     states = set(config['q_states']['q_list'])
-
-    # Add nodes
     for state in states:
         if state == initial_state:
             dot.node(state, state, shape='doublecircle', fillcolor='lightgreen', color='green')
